@@ -1,0 +1,7 @@
+tmp/*
+cache/*
+*.log
+logs/*
+/vendor/*
+/config/app.php
+
