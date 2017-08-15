@@ -1,20 +1,6 @@
-<?php
-/**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @since         0.10.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
- */
+<? $cakeDescription = 'Details Solar Innovations'; ?>
 
-$cakeDescription = 'CakePHP: the rapid development php framework';
-?>
+</head>
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,26 +18,83 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
-</head>
-<body>
-    <nav class="top-bar expanded" data-topbar role="navigation">
-        <ul class="title-area large-3 medium-4 columns">
-            <li class="name">
-                <h1><a href=""><?= $this->fetch('title') ?></a></h1>
-            </li>
-        </ul>
-        <div class="top-bar-section">
-            <ul class="right">
-                <li><a target="_blank" href="http://book.cakephp.org/3.0/">Documentation</a></li>
-                <li><a target="_blank" href="http://api.cakephp.org/3.0/">API</a></li>
-            </ul>
+    
+    <?= $this->Html->css(['bootstrap.min.css','style.css']) ?>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:500i|Roboto:300,400,700|Roboto+Mono" rel="stylesheet">
+</head> 
+<body style="background: #fafafa">
+
+<nav class="navbar navbar-default ">
+    <div class="container-fluid" style="margin-left: 20px">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><?= $this->Html->Image('main-logo.png', ['class'=>'logo img-logo']); ?></a>
         </div>
-    </nav>
-    <?= $this->Flash->render() ?>
-    <div class="container clearfix">
-        <?= $this->fetch('content') ?>
+        <div id="navbar" class="x">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Products <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/products/add">Add New Product</a></li>
+                        <li><a href="/products/">Manage Products</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/products/import">Import Product List</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product Types <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/product-types/add">Add New Product Type</a></li>
+                        <li><a href="/product-types/">Manage Product Types</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/product-types/import">Import Product Type</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Material Types <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/material-types/add">Add New Material Type</a></li>
+                        <li><a href="/material-types">Manage Material Types</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/material-types/import">Import Material Type List</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/product-options/add">Add New Option</a></li>
+                        <li><a href="/product-options/">Manage Options</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/product-options/import">Import Option List</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div><!--/.nav-collapse -->
     </div>
-    <footer>
-    </footer>
+</nav>
+
+<?= $this->Flash->render() ?>
+
+<?= $this->fetch('content') ?>
+
+<footer>
+</footer>
+
+<?= $this->Html->script(['jquery.min.js','bootstrap.min.js', 'dropzone.js', 'script.js']) ?>
+
+<style>
+
+
 </body>
 </html>
