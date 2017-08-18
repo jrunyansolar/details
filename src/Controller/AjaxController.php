@@ -40,34 +40,36 @@ class AjaxController extends AppController
         $this->Series = $this->loadModel('Series');
 
         $option_ids = implode(',', array_map(function($x) { return $x->value; }, $ProductOptions));
-        $material_type_ids = implode(',', array_map(function($x) { return $x->value; }, $MaterialTypes));
-        $product_type_ids = implode(',', array_map(function($x) { return $x->value; }, $ProductTypes));
+        $material_type_ids = implode(',', array_map(function($x) { return $x; }, $MaterialTypes));
+        $product_type_ids = implode(',', array_map(function($x) { return $x; }, $ProductTypes));
         $series_ids = []; //implode(',', array_map(function($x) { return $x->value; }, $Series));
+        // profile?
 
-        $products = $this->Products->find('all')
-            ->matching('ProductOptions', function ($q)  use ($option_ids) {
-                    return $q->where(["option_id IN ($option_ids)"]); 
-                    });
+        $products = $this->Products->find('all');
+        
+        if( !empty($option_ids) ) {
+            $products = $products->matching('ProductOptions', function ($q)  use ($option_ids) {
+                return $q->where(["option_id IN ($option_ids)"]); 
+            });
+        }
 
         if( !empty($material_type_ids) ) {
             $products = $products->matching('MaterialTypes', function ($q)  use ($material_type_ids) {
-                    print("material_type_ids:  $material_type_ids\n");
-                    return $q->where(["material_type_id IN ($material_type_ids)"]); 
-                    });
+                return $q->where(["material_type_id IN ($material_type_ids)"]); 
+            });
         }
 
         if( !empty($product_type_ids) ) {
             $products = $products->matching('ProductTypes', function ($q)  use ($product_type_ids) {
-                print("product_type_ids: $product_type_ids\n");
                 return $q->where(["product_type_id IN ($product_type_ids)"]); 
-                });
+            });
         }
 
         if( !empty($series_ids) ) {
+            print("getting series");
             $products = $products->matching('Series', function ($q)  use ($series_ids) {
-                print("optin ids: $series_ids\n");
                 return $q->where(["id IN ($series_ids)"]); 
-                });
+            });
         }
 
         $products = $products

@@ -44,25 +44,69 @@ $cakeDescription = 'Details Solar Innovations';
 </head> 
 <body style="background: #fafafa">
 
-<nav class="navbar navbar-default ">
-    <div class="container-fluid" style="margin-left: 20px">
-        <div class="navbar-header">
-            <a type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            </a>
-            <a class="navbar-brand" href="#"><?= $this->Html->Image('main-logo.png', ['class'=>'logo img-logo']); ?></a>
-        </div>
-        <div id="navbar" class="x">
-            <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-         
-            </ul>
-        </div><!--/.nav-collapse -->
-    </div>
-</nav>
+
+  <nav class="navbar navbar-default ">
+      <div class="container-fluid" style="margin-left: 20px">
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#"><?= $this->Html->Image('main-logo.png', ['class'=>'logo img-logo']); ?></a>
+          </div>
+          <div id="navbar" class="x">
+              <ul class="nav navbar-nav">
+                  <li class="active"><a href="#">Home</a></li>
+
+                  <? if($user): ?>
+                  <li class="dropdown">
+
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Products <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a href="/products/add">Add New Product</a></li>
+                          <li><a href="/products/">Manage Products</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="/products/import">Import Product List</a></li>
+                      </ul>
+                  </li>
+                  <li class="dropdown">
+
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product Types <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a href="/product-types/add">Add New Product Type</a></li>
+                          <li><a href="/product-types/">Manage Product Types</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="/product-types/import">Import Product Type</a></li>
+                      </ul>
+                  </li>
+                  <li class="dropdown">
+
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Material Types <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a href="/material-types/add">Add New Material Type</a></li>
+                          <li><a href="/material-types">Manage Material Types</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="/material-types/import">Import Material Type List</a></li>
+                      </ul>
+                  </li>
+                  <li class="dropdown">
+
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a href="/options/add">Add New Option</a></li>
+                          <li><a href="/options/">Manage Options</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="/options/import">Import Option List</a></li>
+                      </ul>
+                  </li>
+                  <?php endif; ?>
+              </ul>
+          </div><!--/.nav-collapse -->
+      </div>
+  </nav>
+
 
     <div style="background: #fafafa">
         <div class="container-fluid"  ng-app="mainApp">

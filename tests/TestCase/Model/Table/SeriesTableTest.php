@@ -29,9 +29,9 @@ class SeriesTableTest extends TestCase
         'app.product_types',
         'app.material_types',
         'app.product_material_type',
-        'app.series_product',
+        'app.product_options',
         'app.options',
-        'app.series_options'
+        'app.series_product'
     ];
 
     /**

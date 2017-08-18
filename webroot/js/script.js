@@ -5,8 +5,8 @@ function updatePanels() {
     var material_types = [];
     var product_options = [];
 
-    $('[id^=field-pt-]').each(function(){
-        if($(this).prop('checked')) product_types.push($(this).val());
+    $('[id^=product-type] :selected').each(function(){
+        product_types.push($(this).val());
     });
 
     $('[id^=field-po-] :selected').each(function(){
@@ -16,8 +16,8 @@ function updatePanels() {
         };
     });
 
-    $('[id^=field-mt-]').each(function(){
-        if($(this).prop('checked')) material_types.push($(this).val());
+    $('[id^=material-type] :selected').each(function(){
+        material_types.push($(this).val());
     });
 
     var selected_items = {
@@ -37,14 +37,17 @@ function updatePanels() {
         console.log('saved products to memory');
         console.log(products);
 
-        for(var i = 0; i < Object.keys(data.products).length; i++){
-            var product = data.products[i];
-            console.log('Adding: ' + product.id + ' to product table.');
-            product_table_add(i, product.id, product.name, product.series_id, product.material_type_id, product.product_type_id, 
-                product.name, product.dwg_path, product.pdf_path); 
+        if(Object.keys(data.products).length > 0) {
+            for(var i = 0; i < Object.keys(data.products).length; i++){
+                var product = data.products[i];
+                console.log('Adding: ' + product.id + ' to product table.');
+                product_table_add(i, product.id, product.name, product.series_id, product.material_type_id, product.product_type_id, 
+                    product.name, product.dwg_path, product.pdf_path); 
+            }
+        
+            // Show the preview for the first file.
+            preview_file(0);
         }
-
-        //$('#series-panel').text(materials);
     });
 };
 
@@ -117,10 +120,16 @@ function download_file(type, id) {
     console.log('downloading: ' + type + ', id: ' + id);
 }
 
-function preview_file(type, id) {
-    console.log('previewing file: ' + type + ', id: ' + id);
+function preview_file(id) {
+    console.log('previewing file: id: ' + id);
+    var image = new Image();
+    image.className = 'img-responsive';
+    image.src = '/files/png/' + products[id].name + '.png';
+    
+    $('#preview-panel img').remove();
+    $('#preview-panel').append(image);
 
-    // $('#image_preview').attr('src') = data.imageUrl;
+    $('#preview-unavailable').hide();
 }
 
 function new_cart_item(series, material_type, product_type, product_description) {
@@ -133,8 +142,23 @@ function new_cart_item(series, material_type, product_type, product_description)
     parent.append(newchild);
     
 }
+bootstrap_alert = function() {}
+bootstrap_alert.warning = function(message) {
+    $('#alert_container').html('<div class="alert alert-warning"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+}
+
+bootstrap_alert.error = function(message) {
+    $('#alert_container').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+}
+
+bootstrap_alert.success = function(message) {
+    $('#alert_container').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+}
+
 
 $(document).ready(function() {
+    
+    var is_changed = false;
 
     $('#options-panel input,select').click(function() {
         console.log('selected item.');
@@ -146,7 +170,127 @@ $(document).ready(function() {
         console.log('selected change.');
     });
 
+    $('#parent-id').on('change', function() {
+        is_parent = $(this).val() == '';
+        //$('#value').attr('disabled', is_parent);
+        //$('#identifier-key').attr('disabled', is_parent);
+    });
+
+    
+    $('#import').on('click', function() { 
+        if (!window.XMLHttpRequest){
+            alert("Your browser does not support the native XMLHttpRequest object.");
+            exit;
+
+        }
+        try{
+            var xhr = new XMLHttpRequest();  
+            xhr.previous_text = '';
+                                        
+            xhr.onerror = function() { console.log("[XHR] Fatal Error."); };
+            xhr.onreadystatechange = function() {
+                try{
+                    if (xhr.readyState == 4){
+                        $('#table-result-rows').html(xhr.responseText);
+                        console.log(xhr.responseText);
+                    } 
+                    else if (xhr.readyState > 2){
+                        xhr.previous_text = xhr.responseText;
+                        $('#table-result-rows').html(xhr.responseText);
+                        console.log(xhr.responseText);
+                    }  
+                }
+                catch (e){
+                    console.log("[XHR STATECHANGE] Exception: " + e);
+                }                     
+            };
+            
+            xhr.open("POST", "import", true);
+            xhr.send();      
+        }
+        catch (e){
+            alert("[XHR REQUEST] Exception: " + e);
+        }
+    });
+
+    $('.generate-identifier-key').on('click', function() { 
+        is_changed = true; 
+        
+        var name = $('#name').val(); 
+        if(name == '') {
+            bootstrap_alert.error('You must provide a name for the option before you can generate an Identifier Key.');
+            return;
+        }
+        if(name.length < 4) {
+            bootstrap_alert.error('The name must be longer than 4 characters to generate an Identifier Key.');
+            return;
+        }
+
+        var identifier_key_field = $('#identifier-key'); 
+        var identifier_key = create_identifier(name);
+        identifier_key_field.val(identifier_key);
+        console.log('Generated Identifier Key', name, identifier_key); 
+
+        bootstrap_alert.success('An Identifier Key has been created off the product name.');
+
+        return false;
+    });
+
     $('select').selectpicker();
+    //$('table').footable();
+
 });
 
- 
+function create_identifier(name) {
+    
+    var identifier = '';
+    var parts = name.split(' ');
+    if(parts.length <= 2) {
+        identifier = name.substring(0, 4);
+    }
+    else {
+        identifier = parts[0].substring(0, 2) + parts[1].substring(0,1) + parts[2].substring(0,1);
+    }
+
+    console.log("gen: " + name, identifier);
+    return identifier.toUpperCase();
+}
+
+
+$('#add-option-save-changes').on('click', function(e) { 
+    console.log('submitting changes'); 
+    e.preventDefault(); 
+    
+    var alert_div = $('#alert');
+    
+    var keep_open = $('#keep-open').prop('checked');
+    var option_name = $('#name').val();
+    var parent_id = $('#parent-id').val();
+    var option_type = $('#type').val();
+    var identifier_key = $('#identifier-key').val();
+    if(option_name == '' || identifier_key == '') {
+        alert('You must provide a name and an identifier key.');
+        return;
+    }
+    $.post('/options/add/index.json', {'parent_id': parent_id, 'name': option_name, 'type': 0, 'identifier_key': identifier_key, 'value': ''})
+    .done(function(data) {
+        option_name = $('#name').val('');
+        $('#identifier-key').val('');
+
+        alert_div.addClass('alert-success');
+        alert_div.text('The option was added.');
+        alert_div.show();
+
+        if(keep_open == 0) $('#myModal').modal('hide');  
+    }).fail(function(msg) {
+        alert( "alert-error" );
+        alert_div.text('The option was not added.');
+        alert_div.show();
+    });
+    
+
+
+    console.log('done');
+
+    
+});

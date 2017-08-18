@@ -35,12 +35,14 @@ class ProductTypesController extends AppController
      */
     public function view($id = null)
     {
-        $productType = $this->ProductTypes->get($id, [
-            'contain' => ['Products']
-        ]);
+        $this->Products = $this->loadModel('Products');
 
-        $this->set('productType', $productType);
-        $this->set('_serialize', ['productType']);
+        $productType = $this->ProductTypes->get($id);
+        $products = $this->Products->find('all')->contain(['ProductTypes','MaterialTypes','Series','ProductOptions'])->where(['ProductTypes.Id'=>$id])->toArray();
+
+        $this->set(compact('productType','products']));
+        
+        $this->set('_serialize', ['productType','products']);
     }
 
     /**

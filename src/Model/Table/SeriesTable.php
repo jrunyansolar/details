@@ -61,6 +61,9 @@ class SeriesTable extends Table
             ->allowEmpty('name')
             ->add('name', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
 
+        $validator
+            ->allowEmpty('identifier_key');
+
         return $validator;
     }
 

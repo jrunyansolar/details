@@ -11,7 +11,7 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\OptionsTable|\Cake\ORM\Association\BelongsTo $ParentOptions
  * @property \App\Model\Table\OptionsTable|\Cake\ORM\Association\HasMany $ChildOptions
- * @property \App\Model\Table\SeriesTable|\Cake\ORM\Association\BelongsToMany $Series
+ * @property \App\Model\Table\ProductOptionsTable|\Cake\ORM\Association\HasMany $ProductOptions
  *
  * @method \App\Model\Entity\Option get($primaryKey, $options = [])
  * @method \App\Model\Entity\Option newEntity($data = null, array $options = [])
@@ -46,10 +46,8 @@ class OptionsTable extends Table
             'className' => 'Options',
             'foreignKey' => 'parent_id'
         ]);
-        $this->belongsToMany('Series', [
-            'foreignKey' => 'options_id',
-            'targetForeignKey' => 'series_id',
-            'joinTable' => 'series_options'
+        $this->hasMany('ProductOptions', [
+            'foreignKey' => 'option_id'
         ]);
     }
 
@@ -75,6 +73,10 @@ class OptionsTable extends Table
         $validator
             ->allowEmpty('value');
 
+        $validator
+            ->allowEmpty('identifier_key')
+            ->add('identifier_key', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+
         return $validator;
     }
 
@@ -87,6 +89,7 @@ class OptionsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
+        $rules->add($rules->isUnique(['identifier_key']));
         $rules->add($rules->existsIn(['parent_id'], 'ParentOptions'));
 
         return $rules;

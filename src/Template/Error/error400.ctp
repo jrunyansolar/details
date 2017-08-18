@@ -12,6 +12,8 @@ if (Configure::read('debug')):
 
     $this->start('file');
 ?>
+
+
 <?php if (!empty($error->queryString)) : ?>
     <p class="notice">
         <strong>SQL Query: </strong>

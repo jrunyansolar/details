@@ -8,10 +8,10 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property string $name
+ * @property string $identifier_key
  *
  * @property \App\Model\Entity\Product[] $products
  * @property \App\Model\Entity\SeriesProduct[] $series_product
- * @property \App\Model\Entity\Option[] $options
  */
 class Series extends Entity
 {

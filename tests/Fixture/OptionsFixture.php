@@ -22,8 +22,11 @@ class OptionsFixture extends TestFixture
         'name' => ['type' => 'string', 'length' => 50, 'null' => true, 'default' => null, 'collate' => 'latin1_swedish_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'type' => ['type' => 'integer', 'length' => 4, 'unsigned' => false, 'null' => true, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'value' => ['type' => 'string', 'length' => 255, 'null' => true, 'default' => null, 'collate' => 'latin1_swedish_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
+        'identifier_key' => ['type' => 'string', 'length' => 10, 'null' => true, 'default' => null, 'collate' => 'latin1_swedish_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id'], 'length' => []],
+            'identifier_key' => ['type' => 'unique', 'columns' => ['identifier_key', 'id'], 'length' => []],
+            'UK_options_identifier_key' => ['type' => 'unique', 'columns' => ['identifier_key'], 'length' => []],
         ],
         '_options' => [
             'engine' => 'InnoDB',
@@ -43,7 +46,8 @@ class OptionsFixture extends TestFixture
             'parent_id' => 1,
             'name' => 'Lorem ipsum dolor sit amet',
             'type' => 1,
-            'value' => 'Lorem ipsum dolor sit amet'
+            'value' => 'Lorem ipsum dolor sit amet',
+            'identifier_key' => 'Lorem ip'
         ],
     ];
 }

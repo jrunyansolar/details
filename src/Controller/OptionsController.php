@@ -23,7 +23,7 @@ class OptionsController extends AppController
         $this->paginate = [
             'contain' => ['ParentOptions']
         ];
-        $options = $this->paginate($this->Options);
+        $options = $this->paginate($this->Options->find('all')->where(['Options.parent_id is null']));
 
         $this->set(compact('options'));
         $this->set('_serialize', ['options']);
@@ -39,7 +39,7 @@ class OptionsController extends AppController
     public function view($id = null)
     {
         $option = $this->Options->get($id, [
-            'contain' => ['ParentOptions', 'Series', 'ChildOptions']
+            'contain' => ['ParentOptions', 'ChildOptions']
         ]);
 
         $this->set('option', $option);
@@ -53,8 +53,15 @@ class OptionsController extends AppController
      */
     public function add()
     {
+        $success = false;
         $option = $this->Options->newEntity();
-        if ($this->request->is('post')) {
+        if ($this->request->is('json')) {
+             $option = $this->Options->patchEntity($option, $this->request->getData());
+             if ($this->Options->save($option)) {
+                 $success = true;
+             }
+        }
+        else if ($this->request->is('post')) {
             $option = $this->Options->patchEntity($option, $this->request->getData());
             if ($this->Options->save($option)) {
                 $this->Flash->success(__('The option has been saved.'));
@@ -63,10 +70,10 @@ class OptionsController extends AppController
             }
             $this->Flash->error(__('The option could not be saved. Please, try again.'));
         }
-        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200]);
-        $series = $this->Options->Series->find('list', ['limit' => 200]);
-        $this->set(compact('option', 'parentOptions', 'series'));
-        $this->set('_serialize', ['option']);
+ 
+        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->where(['ParentOptions.parent_id is null']);
+        $this->set(compact('success', 'option', 'parentOptions'));
+        $this->set('_serialize', ['option',' success']);
     }
 
     /**
@@ -78,9 +85,7 @@ class OptionsController extends AppController
      */
     public function edit($id = null)
     {
-        $option = $this->Options->get($id, [
-            'contain' => ['Series']
-        ]);
+        $option = $this->Options->get($id);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $option = $this->Options->patchEntity($option, $this->request->getData());
             if ($this->Options->save($option)) {
@@ -90,9 +95,9 @@ class OptionsController extends AppController
             }
             $this->Flash->error(__('The option could not be saved. Please, try again.'));
         }
-        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200]);
-        $series = $this->Options->Series->find('list', ['limit' => 200]);
-        $this->set(compact('option', 'parentOptions', 'series'));
+        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->where(['ParentOptions.parent_id is null']);
+        
+        $this->set(compact('option', 'parentOptions'));
         $this->set('_serialize', ['option']);
     }
 

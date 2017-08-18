@@ -25,13 +25,13 @@ class OptionsTableTest extends TestCase
      */
     public $fixtures = [
         'app.options',
-        'app.series',
+        'app.product_options',
         'app.products',
+        'app.series',
+        'app.series_product',
         'app.product_types',
         'app.material_types',
-        'app.product_material_type',
-        'app.series_product',
-        'app.series_options'
+        'app.product_material_type'
     ];
 
     /**

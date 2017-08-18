@@ -2,6 +2,10 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Imagick;
+use Spatie\PdfToImage;
+use Spatie\PdfToImage\Pdf;
+
 
 /**
  * Products Controller
@@ -63,9 +67,9 @@ class ProductsController extends AppController
             }
             $this->Flash->error(__('The product could not be saved. Please, try again.'));
         }
-        $series = $this->Products->Series->find('list', ['limit' => 200]);
-        $productTypes = $this->Products->ProductTypes->find('list', ['limit' => 200]);
-        $materialTypes = $this->Products->MaterialTypes->find('list', ['limit' => 200]);
+        $series = $this->Products->Series->find('list');
+        $productTypes = $this->Products->ProductTypes->find('list');
+        $materialTypes = $this->Products->MaterialTypes->find('list');
         $this->set(compact('product', 'series', 'productTypes', 'materialTypes'));
         $this->set('_serialize', ['product']);
     }
@@ -91,9 +95,9 @@ class ProductsController extends AppController
             }
             $this->Flash->error(__('The product could not be saved. Please, try again.'));
         }
-        $series = $this->Products->Series->find('list', ['limit' => 200]);
-        $productTypes = $this->Products->ProductTypes->find('list', ['limit' => 200]);
-        $materialTypes = $this->Products->MaterialTypes->find('list', ['limit' => 200]);
+        $series = $this->Products->Series->find('list');
+        $productTypes = $this->Products->ProductTypes->find('list');
+        $materialTypes = $this->Products->MaterialTypes->find('list');
         $this->set(compact('product', 'series', 'productTypes', 'materialTypes'));
         $this->set('_serialize', ['product']);
     }
@@ -116,5 +120,134 @@ class ProductsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+
+    private function save_png($pdf_source, $save_path) {
+        if(!file_exists($save_path)) {
+            $pdf = new Pdf($pdf_source);
+            $pdf->saveImage($save_path);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function parse_details($pdf_source) {
+        $identifiers = explode('_', $pdf_source);
+        
+        $result = [
+            'series'=> ['name'=>'-', 'id'=>null],
+            'product_type'=> ['name'=>'-', 'id'=>null],
+            'material_type'=> ['name'=>'-', 'id'=>null],
+            'option_names'=>'-',
+            'options' => []
+        ];
+
+        
+        foreach($identifiers as $identifier) {
+
+            $series = $this->Products->Series->find('all')->where(['identifier_key'=>$identifier])->first();
+            $productType = $this->Products->ProductTypes->find('all')->where(['identifier_key'=>$identifier])->first();
+            $materialTypes = $this->Products->MaterialTypes->find('all')->where(['identifier_key'=>$identifier])->first();
+            $options = $this->Products->ProductOptions->Options->find('all')->where(['identifier_key'=>$identifier])->first();
+            if($series) $result['series'] = $series;
+            elseif($productType) $result['product_type'] = $productType;
+            elseif($materialTypes) $result['material_type'] = $materialTypes;
+            elseif($options) {
+                array_push($result['options'], $options); 
+            }
+            
+        }
+        
+        $result['option_names'] = join(', ', array_column($result['options'], 'name')); 
+
+        return $result;
+    }
+
+    public function import() {
+        @ini_set('zlib.output_compression',0);
+        @ini_set('implicit_flush',1);
+        @ob_end_clean();
+        set_time_limit(0); 
+        ob_implicit_flush(true);
+
+        $productCount = 0;
+        $importedProducts = 0;
+        $errorCount = 0;
+        $results = [];
+        $messages = [];
+
+        $this->Products = $this->loadModel('Products');
+        $productCount = $this->Products->find('all')->count();
+        
+        if($this->request->is('post')) {
+            $source_path = WWW_ROOT. "files/pdf/";
+            $i = 0;
+            $source_dir = array_diff(scandir($source_path), array('..', '.')); 
+            foreach ($source_dir as $key => $value) {
+                $file_name =  basename($value, '.pdf');
+                $save_path = WWW_ROOT . "files/png/$file_name.png";
+                $result = [ 'file'=> $save_path ];
+                
+                // Merge in the parsed details
+                $details = $this->parse_details($file_name);
+                $result = array_merge($result, $details);
+
+                $existing_product = $this->Products->find('all')->where(['name'=>basename($value, '.pdf')])->count();
+                if($existing_product > 0) { 
+                    $result['message'] = 'This product already exists.';
+                    $result['success'] = false;
+                }
+                else {
+                    $saved_file = $this->save_png($source_path.DS.$value, $save_path);
+
+                    if(!$saved_file) {
+                        $result['message'] = 'Could not create the preview from the PDF.';
+                        $result['success'] = false;
+                    }
+                    
+                    $product = $this->Products->newEntity();
+                    $product = $this->Products->patchEntity($product, 
+                        ['series_id'=>  $details['series']['id'], 
+                        'product_type_id'=> $details['product_type']['id'],
+                        'material_type_id'=> $details['material_type']['id'],
+                        'name'=> basename($value, '.pdf'),
+                        'pdf_path'=>$value,
+                        'png_path'=> basename($value, '.png') ]
+                    );
+
+                    $options = $this->Products->ProductOptions->newEntity();
+                    $options = $this->Products->patchEntity($options, [
+                        'option_id' => 1
+                    ]);
+                    
+                    if($this->Products->save($product)) {
+                        $result['success'] = true;
+                        $result['message'] = 'The product has been imported.';
+                    }
+                    else {
+                        $result['success'] = false;
+                        $result['message'] = 'The product could not be imported.';
+                    }
+                }
+                
+                if($result['success']) $importedProducts++; else $errorCount++;
+                array_push($results, $result);
+
+                $class_name = $result['success'] ? "successful" : "failed"; 
+                print("<tr class='$class_name'><td>".basename($value, '.pdf')."</td><td>".
+                        $details['series']['name']."</td><td>".
+                        $details['material_type']['name']."</td><td>".
+                        $details['product_type']['name']."</td><td>".
+                        $details['option_names']."</td><td>".$result['message']."</td></tr>"  );
+            }
+            
+            $messages = array_column($results, 'message');
+            exit(); // Needs to be moved to /ajax/import 
+        }
+            
+        $this->set(compact('productCount', 'importedProducts', 'errorCount', 'messages', 'results'));
+       
     }
 }

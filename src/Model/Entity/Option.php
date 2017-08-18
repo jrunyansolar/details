@@ -11,10 +11,11 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property int $type
  * @property string $value
+ * @property string $identifier_key
  *
  * @property \App\Model\Entity\Option $parent_option
  * @property \App\Model\Entity\Option[] $child_options
- * @property \App\Model\Entity\Series[] $series
+ * @property \App\Model\Entity\ProductOption[] $product_options
  */
 class Option extends Entity
 {
@@ -32,5 +33,4 @@ class Option extends Entity
         '*' => true,
         'id' => false
     ];
-    
 }
