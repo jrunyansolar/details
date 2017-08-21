@@ -5,9 +5,17 @@
     }
 
     body {
-        font-size: 11px;
-        line-height: 13px;
+        font-size: 13px;
+        line-height: 15px;
         font-weight: 100;
+    }
+
+    nav {
+        font-size: 13px;
+    }
+
+    .nav>li>a {
+        padding: 4px;
     }
 
     .img-logo {

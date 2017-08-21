@@ -40,7 +40,7 @@ class ProductTypesController extends AppController
         $productType = $this->ProductTypes->get($id);
         $products = $this->Products->find('all')->contain(['ProductTypes','MaterialTypes','Series','ProductOptions'])->where(['ProductTypes.Id'=>$id])->toArray();
 
-        $this->set(compact('productType','products']));
+        $this->set(compact('productType','products'));
         
         $this->set('_serialize', ['productType','products']);
     }
