@@ -22,13 +22,14 @@ class ProductOptionsCell extends Cell
      *
      * @return void
      */
-    public function display()
+    public function display($columns=false)
     {
-       
         $this->Options = $this->loadModel('Options');
         $options = $this->Options->find('all')->where('parent_id is null')->contain(['ChildOptions'])->toList();
 
         $this->set('productOptions', $options);
-        $this->set('_serialize', ['productOptions']);
+        $this->set('columns', $columns);
+        
+        $this->set('_serialize', ['productOptions','columns']);
     }
 }

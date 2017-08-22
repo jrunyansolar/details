@@ -10,7 +10,7 @@
 
             <div class="products view large-9 medium-8 columns content">
                 <h3><?= h($product->name) ?></h3>
-                <table class="vertical-tablex table table-responsive table-striped">
+                <table class="table table-responsive table-striped">
                     <tr>
                         <th scope="row"><?= __('Series') ?></th>
                         <td><?= $product->has('series') ? $this->Html->link($product->series->name, ['controller' => 'Series', 'action' => 'view', $product->series->id]) : '' ?></td>
@@ -22,18 +22,6 @@
                     <tr>
                         <th scope="row"><?= __('Material Type') ?></th>
                         <td><?= $product->has('material_type') ? $this->Html->link($product->material_type->name, ['controller' => 'MaterialTypes', 'action' => 'view', $product->material_type->id]) : '' ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?= __('Name') ?></th>
-                        <td><?= h($product->name) ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?= __('Pdf Path') ?></th>
-                        <td><?= h($product->pdf_path) ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?= __('Png Path') ?></th>
-                        <td><?= h($product->png_path) ?></td>
                     </tr>
                 </table>
                 <div class="related">
@@ -64,7 +52,7 @@
                 <div class="related">
                     <h4><?= __('Related Series Product') ?></h4>
                     <?php if (!empty($product->series_product)): ?>
-                    <table cellpadding="0" cellspacing="0">
+                    <table cellpadding="0" cellspacing="0" class="table table-responsive">
                         <tr>
                             <th scope="col"><?= __('Id') ?></th>
                             <th scope="col"><?= __('Series Id') ?></th>

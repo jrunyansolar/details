@@ -40,6 +40,10 @@ class AjaxController extends AppController
         $this->Series = $this->loadModel('Series');
 
         $option_ids = implode(',', array_map(function($x) { return $x->value; }, $ProductOptions));
+        print($option_ids);
+
+        print_r($ProductOptions);
+ 
         $material_type_ids = implode(',', array_map(function($x) { return $x; }, $MaterialTypes));
         $product_type_ids = implode(',', array_map(function($x) { return $x; }, $ProductTypes));
         $series_ids = []; //implode(',', array_map(function($x) { return $x->value; }, $Series));
@@ -48,11 +52,15 @@ class AjaxController extends AppController
         $products = $this->Products->find('all');
         
         if( !empty($option_ids) ) {
+            print("searching for option ids");
             $products = $products->matching('ProductOptions', function ($q)  use ($option_ids) {
                 return $q->where(["option_id IN ($option_ids)"]); 
             });
-        }
 
+            exit();
+        }
+        print("ok ...");
+        exit();
         if( !empty($material_type_ids) ) {
             $products = $products->matching('MaterialTypes', function ($q)  use ($material_type_ids) {
                 return $q->where(["material_type_id IN ($material_type_ids)"]); 
