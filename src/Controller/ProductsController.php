@@ -240,18 +240,18 @@ class ProductsController extends AppController
                         $result['success'] = false;
                         $result['message'] = 'The product could not be imported.';
                     }
-                    
-                    $productOptions = $this->Products->ProductOptions->newEntity();
-                    $productOptions =  $this->Products->ProductOptions->patchEntity($productOptions,
-                        [
-                            'option_id' => 1, //TODO: Fix to include the option Id from the post.
-                            'product_id' => $product->id
-                        ]
-                    );
 
-                    $this->Products->ProductOptions->save($productOptions);
-                    // print("productOptions was saved");
-                    
+                    foreach($details['options'] as $option) {
+                        $productOptions = $this->Products->ProductOptions->newEntity();
+                        $productOptions =  $this->Products->ProductOptions->patchEntity($productOptions,
+                            [
+                                'option_id' => $option['id'], //TODO: Fix to include the option Id from the post.
+                                'product_id' => $product->id
+                            ]
+                        );
+
+                        $this->Products->ProductOptions->save($productOptions);
+                    } 
                 }
                 
                 if($result['success']) $importedProducts++; else $errorCount++;
