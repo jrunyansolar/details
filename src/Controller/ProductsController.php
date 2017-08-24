@@ -177,11 +177,20 @@ class ProductsController extends AppController
         $errorCount = 0;
         $results = [];
         $messages = [];
+        $reindex = false;
 
         $this->Products = $this->loadModel('Products');
         $productCount = $this->Products->find('all')->count();
         
         if($this->request->is('post')) {
+            $data = $this->request->input('json_decode');
+            $reindex = $data->reindex;
+            
+            if($reindex) {
+                $this->Products->ProductOptions->deleteAll(['product_id <> 0']);
+                $this->Products->deleteAll([ 'id <> 0' ]);
+            }
+
             $source_path = WWW_ROOT. "files/pdf/";
             $i = 0;
             $source_dir = array_diff(scandir($source_path), array('..', '.')); 
@@ -195,6 +204,10 @@ class ProductsController extends AppController
                 $result = array_merge($result, $details);
 
                 $existing_product = $this->Products->find('all')->where(['name'=>basename($value, '.pdf')])->count();
+
+                // If we are not reindexing, and the product already exists, we can skip it.
+                if(!$reindex && $existing_product) continue;
+
                 if($existing_product > 0) { 
                     $result['message'] = 'This product already exists.';
                     $result['success'] = false;
@@ -206,7 +219,7 @@ class ProductsController extends AppController
                         $result['message'] = 'Could not create the preview from the PDF.';
                         $result['success'] = false;
                     }
-                    
+                                        
                     $product = $this->Products->newEntity();
                     $product = $this->Products->patchEntity($product, 
                         ['series_id'=>  $details['series']['id'], 
@@ -214,22 +227,31 @@ class ProductsController extends AppController
                         'material_type_id'=> $details['material_type']['id'],
                         'name'=> basename($value, '.pdf'),
                         'pdf_path'=>$value,
-                        'png_path'=> basename($value, '.png') ]
+                        'png_path'=> basename($value, '.png')
+                        ]
                     );
-
-                    $options = $this->Products->ProductOptions->newEntity();
-                    $options = $this->Products->patchEntity($options, [
-                        'option_id' => 1
-                    ]);
                     
                     if($this->Products->save($product)) {
                         $result['success'] = true;
                         $result['message'] = 'The product has been imported.';
                     }
                     else {
+                        error_log("The product could not been imported.");
                         $result['success'] = false;
                         $result['message'] = 'The product could not be imported.';
                     }
+
+                    foreach($details['options'] as $option) {
+                        $productOptions = $this->Products->ProductOptions->newEntity();
+                        $productOptions =  $this->Products->ProductOptions->patchEntity($productOptions,
+                            [
+                                'option_id' => $option['id'], //TODO: Fix to include the option Id from the post.
+                                'product_id' => $product->id
+                            ]
+                        );
+
+                        $this->Products->ProductOptions->save($productOptions);
+                    } 
                 }
                 
                 if($result['success']) $importedProducts++; else $errorCount++;
