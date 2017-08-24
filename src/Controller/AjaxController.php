@@ -55,7 +55,7 @@ class AjaxController extends AppController
         if( !empty($product_type_ids) ) {
             $products = $products->Where(["product_type_id IN ($product_type_ids)"]); 
         }
-
+ 
         if( !empty($series_ids) ) {
             $products = $products->where(["id IN ($series _ids)"]); 
         }

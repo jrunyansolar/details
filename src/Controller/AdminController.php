@@ -19,7 +19,7 @@ class AdminController extends AppController
      */
     public function index()
     {
-        
+        return $this->redirect("/");
     }
  
 }

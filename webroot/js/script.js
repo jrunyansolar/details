@@ -178,6 +178,11 @@ $(document).ready(function() {
 
     
     $('#import').on('click', function() { 
+        $('#importer-actions').hide();
+        $('#import-result').show();
+        var rowsImported = 0;
+        var rowsErrored = 0;
+
         if (!window.XMLHttpRequest){
             alert("Your browser does not support the native XMLHttpRequest object.");
             exit;
@@ -193,10 +198,17 @@ $(document).ready(function() {
                     if (xhr.readyState == 4){
                         $('#table-result-rows').html(xhr.responseText);
                         console.log(xhr.responseText);
+
+                        var failed = $('#table-result-rows tr.failed').length;
+                        var success = $('#table-result-rows tr').length - failed;
+                        
+                        bootstrap_alert.success(success + ' product(s) has been imported successfully.<br>' + failed + ' product(s) have failed to be imported successfully.');
+
                     } 
                     else if (xhr.readyState > 2){
                         xhr.previous_text = xhr.responseText;
                         $('#table-result-rows').html(xhr.responseText);
+                        rowsImported++;
                         console.log(xhr.responseText);
                     }  
                 }
@@ -205,8 +217,11 @@ $(document).ready(function() {
                 }                     
             };
             
+            var reindex = $('#reindex').prop('checked');
+            
             xhr.open("POST", "import", true);
-            xhr.send();      
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.send('{ "reindex": ' + reindex + ' }');      
         }
         catch (e){
             alert("[XHR REQUEST] Exception: " + e);
