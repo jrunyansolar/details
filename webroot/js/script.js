@@ -4,9 +4,14 @@ function updatePanels() {
     var product_types = [];
     var material_types = [];
     var product_options = [];
+    var series = [];
 
     $('[id^=product-type] :selected').each(function(){
         product_types.push($(this).val());
+    });
+
+    $('[id^=series] :selected').each(function(){
+        series.push($(this).val());
     });
 
     $('[id^=field-po-] :selected').each(function(){
@@ -23,11 +28,12 @@ function updatePanels() {
     var selected_items = {
         product_types: product_types,
         material_types: material_types,
-        product_options: product_options
+        product_options: product_options,
+        series: series
     };
 
     // On Material Type Selection
-    $.post('//details.solarinnovations.test/ajax/index.json', 
+    $.post('/ajax/index.json', 
         JSON.stringify(selected_items)
     ).done(function(data) {
         product_table_clear();
@@ -41,7 +47,7 @@ function updatePanels() {
             for(var i = 0; i < Object.keys(data.products).length; i++){
                 var product = data.products[i];
                 console.log('Adding: ' + product.id + ' to product table.');
-                product_table_add(i, product.id, product.name, product.series_id, product.material_type_id, product.product_type_id, 
+                product_table_add(i, product.id, product.name, product.series.name, product.material_type.name, product.product_type.name, 
                     product.name, product.dwg_path, product.pdf_path); 
             }
         
@@ -73,6 +79,7 @@ function product_table_add(row_id, product_id, product_name, series_id, material
     row.find('#product_type').text(product_type);
     row.find('#material_type').text(material_type);
     row.attr('data-id', row_id);
+    row.attr('data-product-id', product_id);
     row.find('.preview-product').attr('data-id', row_id);
     row.find('.download-product').attr('data-id', row_id);
     
@@ -103,13 +110,11 @@ function product_table_add(row_id, product_id, product_name, series_id, material
 
         var id = $(this).data('id');
 
-        window.location = '/files/pdf/' + products[id].name + '.pdf';
+        window.open('/files/pdf/' + products[id].name + '.pdf', '_blank');
+        window.open('/files/pdf/' + products[id].name + '.dwg', '_blank');
+        //window.location = '/files/pdf/' + products[id].name + '.pdf';
     });
 
-    row.find('.download-products').on('click', function() {
-        alert('Downloading all products');
-    });
-    
     var product_table = $("#product-table");
     product_table.append(row); 
 
@@ -176,6 +181,15 @@ $(document).ready(function() {
         //$('#identifier-key').attr('disabled', is_parent);
     });
 
+    $('.download-products').on('click', function() {
+        var selected_products = [];
+        $('.series-checkbox:checked').each(function(){ 
+            selected_products.push($(this).closest('tr').data('product-id'));
+        });
+        if(selected_products.length == 0) alert('There are no products selected.');
+        else window.open('/ajax/download?product_ids=' + selected_products.join(","), '_blank');
+
+    });
     
     $('#import').on('click', function() { 
         $('#importer-actions').hide();
@@ -227,10 +241,24 @@ $(document).ready(function() {
             alert("[XHR REQUEST] Exception: " + e);
         }
     });
-
+    
     $('.generate-identifier-key').on('click', function() { 
         is_changed = true; 
         
+        success_alert = function(text) {
+            var alert_div = $('#alert');
+            alert_div.addClass('alert-success');
+            alert_div.text(text);
+            alert_div.show();
+        }
+
+        error_alert = function(text) {
+            var alert_div = $('#alert');
+            alert_div.addClass('alert-success');
+            alert_div.text(text);
+            alert_div.show();
+        }
+
         var name = $('#name').val(); 
         if(name == '') {
             bootstrap_alert.error('You must provide a name for the option before you can generate an Identifier Key.');
@@ -246,8 +274,48 @@ $(document).ready(function() {
         identifier_key_field.val(identifier_key);
         console.log('Generated Identifier Key', name, identifier_key); 
 
-        bootstrap_alert.success('An Identifier Key has been created off the product name.');
+        
+        success_alert('The option was added.');
 
+        return false;
+    });
+
+    $('.modal-generate-identifier-key').on('click', function() { 
+        is_changed = true; 
+        
+        success_alert = function(text) {
+            var alert_div = $('#alert');
+            alert_div.addClass('alert-success');
+            alert_div.text(text);
+            alert_div.show();
+        }
+
+        error_alert = function(text) {
+            var alert_div = $('#alert');
+            alert_div.addClass('alert-success');
+            alert_div.text(text);
+            alert_div.show();
+        }
+
+
+        var name = $('#new-name').val(); 
+        if(name == '') {
+            error_alert('You must provide a name for the option before you can generate an Identifier Key.');
+            return;
+        }
+        if(name.length < 4) {
+            error_alert('The name must be longer than 4 characters to generate an Identifier Key.');
+            return;
+        }
+
+        var identifier_key_field = $('#new-identifier-key'); 
+        var identifier_key = create_identifier(name);
+        identifier_key_field.val(identifier_key);
+
+        success_alert('An Identifier Key has been created off the product name.');
+
+        console.log('Generated Identifier Key', name, identifier_key); 
+        
         return false;
     });
 
@@ -260,7 +328,7 @@ function create_identifier(name) {
     
     var identifier = '';
     var parts = name.split(' ');
-    if(parts.length <= 2) {
+    if(parts.length <= 2 && name.length >= 4) {
         identifier = name.substring(0, 4);
     }
     else {
@@ -279,33 +347,44 @@ $('#add-option-save-changes').on('click', function(e) {
     var alert_div = $('#alert');
     
     var keep_open = $('#keep-open').prop('checked');
-    var option_name = $('#name').val();
-    var parent_id = $('#parent-id').val();
+    var option_name = $('#new-name').val();
+    var parent_id = $('#new-parent-id').val();
     var option_type = $('#type').val();
-    var identifier_key = $('#identifier-key').val();
+    var identifier_key = $('#new-identifier-key').val();
     if(option_name == '' || identifier_key == '') {
         alert('You must provide a name and an identifier key.');
         return;
     }
-    $.post('/options/add/index.json', {'parent_id': parent_id, 'name': option_name, 'type': 0, 'identifier_key': identifier_key, 'value': ''})
-    .done(function(data) {
-        option_name = $('#name').val('');
-        $('#identifier-key').val('');
 
+    success_alert = function(text) {
+        var alert_div = $('#alert');
         alert_div.addClass('alert-success');
-        alert_div.text('The option was added.');
+        alert_div.text(text);
         alert_div.show();
+    }
 
+
+    $.post('/options/add/index.json', 
+        {'parent_id': parent_id, 'name': option_name, 'type': 0, 'identifier_key': identifier_key, 'value': ''})
+    .done(function(data) {
+        $('#new-name').val('');
+        $('#new-identifier-key').val('');
+        $('#new-name').focus();
+
+        //TODO: Add action buttons.
+        var actions = 'Refresh For Actions';
+        $('#related-options').append('<tr><td>' + option_name + '</td><td>' + identifier_key + '</td><td>' + actions + '</td></tr>');
+
+        success_alert('The option was added.');
         if(keep_open == 0) $('#myModal').modal('hide');  
+
     }).fail(function(msg) {
-        alert( "alert-error" );
-        alert_div.text('The option was not added.');
-        alert_div.show();
+        error_alert.text('The option was not added.');
     });
     
-
-
-    console.log('done');
-
-    
 });
+
+    // Foucs on the name field when the modal is opened.
+    $('#myModal').on('shown.bs.modal', function () {
+        $('#new-name').focus();
+    });

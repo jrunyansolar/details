@@ -51,6 +51,16 @@
 
                 </ul>
             </li>
+            
+            <li class="dropdown">
+
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Series <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/series/add">Add Series</a></li>
+                    <li><a href="/series/">Manage Series</a></li>
+                </ul>
+            </li>
+
             <li class="dropdown">
 
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product Types <span class="caret"></span></a>

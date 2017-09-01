@@ -12,7 +12,7 @@
 
 <div class="options view large-9 medium-8 columns content">
     <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
-    Add Related Option
+        Add Related Option
     </button>
 
     <hr/>

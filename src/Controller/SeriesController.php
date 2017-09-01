@@ -36,7 +36,7 @@ class SeriesController extends AppController
     public function view($id = null)
     {
         $series = $this->Series->get($id, [
-            'contain' => ['Options', 'Products', 'SeriesProduct']
+            'contain' => ['Products', 'SeriesProduct']
         ]);
 
         $this->set('series', $series);
@@ -60,8 +60,7 @@ class SeriesController extends AppController
             }
             $this->Flash->error(__('The series could not be saved. Please, try again.'));
         }
-        $options = $this->Series->Options->find('list', ['limit' => 200]);
-        $this->set(compact('series', 'options'));
+        $this->set(compact('series'));
         $this->set('_serialize', ['series']);
     }
 
@@ -75,7 +74,7 @@ class SeriesController extends AppController
     public function edit($id = null)
     {
         $series = $this->Series->get($id, [
-            'contain' => ['Options']
+            'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $series = $this->Series->patchEntity($series, $this->request->getData());
@@ -86,8 +85,7 @@ class SeriesController extends AppController
             }
             $this->Flash->error(__('The series could not be saved. Please, try again.'));
         }
-        $options = $this->Series->Options->find('list', ['limit' => 200]);
-        $this->set(compact('series', 'options'));
+        $this->set(compact('series'));
         $this->set('_serialize', ['series']);
     }
 

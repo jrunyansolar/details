@@ -5,3 +5,4 @@ logs/*
 /vendor/*
 /config/app.php
 node_modules/*
+webroot/files/*

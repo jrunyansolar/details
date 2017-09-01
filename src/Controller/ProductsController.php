@@ -157,11 +157,10 @@ class ProductsController extends AppController
             elseif($options) {
                 array_push($result['options'], $options); 
             }
-            
         }
         
         $result['option_names'] = join(', ', array_column($result['options'], 'name')); 
-
+        
         return $result;
     }
 
@@ -191,29 +190,33 @@ class ProductsController extends AppController
                 $this->Products->deleteAll([ 'id <> 0' ]);
             }
 
-            $source_path = WWW_ROOT. "files/pdf/";
+            $source_path = WWW_ROOT. "files/pdf/*.pdf";
+            $save_dir = WWW_ROOT. "files/png/";
+            
             $i = 0;
-            $source_dir = array_diff(scandir($source_path), array('..', '.')); 
+            $source_dir = array_diff(glob($source_path), array('..', '.')); 
+
             foreach ($source_dir as $key => $value) {
-                $file_name =  basename($value, '.pdf');
-                $save_path = WWW_ROOT . "files/png/$file_name.png";
+                $file_name =  $save_dir . basename($value, '.pdf');
+                $save_path = $file_name. ".png";
+                
                 $result = [ 'file'=> $save_path ];
                 
                 // Merge in the parsed details
                 $details = $this->parse_details($file_name);
                 $result = array_merge($result, $details);
-
+            
                 $existing_product = $this->Products->find('all')->where(['name'=>basename($value, '.pdf')])->count();
-
-                // If we are not reindexing, and the product already exists, we can skip it.
-                if(!$reindex && $existing_product) continue;
+ 
+                //if we are not reindexing, and the product already exists, we can skip it.
+                if(!$reindex && $existing_product > 0) continue;
 
                 if($existing_product > 0) { 
                     $result['message'] = 'This product already exists.';
                     $result['success'] = false;
                 }
                 else {
-                    $saved_file = $this->save_png($source_path.DS.$value, $save_path);
+                    $saved_file = $this->save_png($value, $save_path);
 
                     if(!$saved_file) {
                         $result['message'] = 'Could not create the preview from the PDF.';
@@ -268,7 +271,6 @@ class ProductsController extends AppController
             $messages = array_column($results, 'message');
             exit(); // Needs to be moved to /ajax/import 
         }
-            
         $this->set(compact('productCount', 'importedProducts', 'errorCount', 'messages', 'results'));
        
     }

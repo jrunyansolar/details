@@ -16,12 +16,9 @@
                         1=>'Free Numeric',
                         2=>'Multi Choice Numeric',
                         ], ['class'=>'form-control']); ?></div>                
-                <div class="form-group"><label>Nest Option Under Parent:</label><?= $this->Form->control('parent_id', ['label'=>false, 'options' => $parentOptions, 'empty' => '-'], ['class'=>'form-control']); ?></div>
                 <div class="form-group"><?= $this->Form->control('name', ['class'=>'form-control']); ?></div>
-                <div class="form-group"><?= $this->Form->control('identifier_key', ['class'=>'form-control', 'disabled']); ?></div>
-
-                <?= $this->Form->button(__('Submit'), ['class'=>'btn btn-default']) ?> 
-                <a class="btn btn-success generate-identifier-key">Generate Identifier Key</a>
+                
+                <?= $this->Form->button(__('Submit'), ['class'=>'btn btn-default']) ?>  
                 <?= $this->Form->end() ?>
             </div>
         </div>

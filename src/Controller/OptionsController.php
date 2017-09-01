@@ -23,8 +23,8 @@ class OptionsController extends AppController
         $this->paginate = [
             'contain' => ['ParentOptions']
         ];
-        $options = $this->paginate($this->Options->find('all')->where(['Options.parent_id is null']));
-
+        $options = $this->paginate($this->Options->find('all')->contain(['ChildOptions'])->order('ISNULL(Options.order), Options.order ASC')->where(['Options.parent_id is null']));
+ 
         $this->set(compact('options'));
         $this->set('_serialize', ['options']);
     }
@@ -71,7 +71,7 @@ class OptionsController extends AppController
             $this->Flash->error(__('The option could not be saved. Please, try again.'));
         }
  
-        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->where(['ParentOptions.parent_id is null']);
+        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->order('ISNULL(Options.order), Options.order ASC')->where(['ParentOptions.parent_id is null']);
         $this->set(compact('success', 'option', 'parentOptions'));
         $this->set('_serialize', ['option',' success']);
     }
@@ -86,18 +86,22 @@ class OptionsController extends AppController
     public function edit($id = null)
     {
         $option = $this->Options->get($id);
+
         if ($this->request->is(['patch', 'post', 'put'])) {
+
             $option = $this->Options->patchEntity($option, $this->request->getData());
             if ($this->Options->save($option)) {
                 $this->Flash->success(__('The option has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action'=>'index']);
             }
+            
             $this->Flash->error(__('The option could not be saved. Please, try again.'));
         }
-        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->where(['ParentOptions.parent_id is null']);
-        
-        $this->set(compact('option', 'parentOptions'));
+
+        $childOptions = $this->Options->ParentOptions->find('all', ['limit' => 200])->order('ISNULL(ParentOptions.order), ParentOptions.order ASC')->where(['ParentOptions.parent_id'=> $id])->toList();
+        $parentOptions = $this->Options->ParentOptions->find('list', ['limit' => 200])->order('ISNULL(ParentOptions.order), ParentOptions.order ASC')->where(['ParentOptions.parent_id is null'])->toList();
+        $this->set(compact('option', 'childOptions', 'parentOptions'));
         $this->set('_serialize', ['option']);
     }
 
@@ -118,6 +122,6 @@ class OptionsController extends AppController
             $this->Flash->error(__('The option could not be deleted. Please, try again.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect($this->referer());
     }
 }

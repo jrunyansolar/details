@@ -6,9 +6,9 @@
                 <div class="panel panel-default">
                   <div class="panel-heading">Product Filter Options</div>
                     <div class="panel-body" id="options-panel">
+                        <?= $this->Cell('Series'); ?>
+                        <?= $this->Cell('ProductTypes'); ?>
                         <?= $this->Cell('MaterialTypes'); ?>
-                        
-                        <?= $this->Cell('ProductTypes'); ?> 
                         
                         <?= $this->Cell('ProductOptions'); ?> 
 
